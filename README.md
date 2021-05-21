@@ -96,6 +96,10 @@ To install LOHHLA, simply clone the repository:
 
 git clone https://github.com/pzweuj/LOHHLA.git
 
+#### Install from docker ####
+
+docker pull pzweuj/lohhla:v1
+
 ### How do I run LOHHLA? ###
 
 LOHHLA is coded in R, and can be executed from the command line (Terminal, in 
@@ -109,6 +113,10 @@ USAGE:
 For a description of all the options, run: 
 
     Rscript LOHHLAscript.R -h
+
+For docker user, run:
+
+    docker run -it --rm -v <directory>:/data pzweuj/lohhla:v1 LOHHLAscript.R -h
 
 
 ### What is the output of LOHHLA? ###
