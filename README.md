@@ -73,8 +73,8 @@ Please ensure a number of dependencies are first installed. These include:
 
 * BEDTools (http://bedtools.readthedocs.io/en/latest/)
 * SAMtools (http://samtools.sourceforge.net/)
-* Novalign (http://www.novocraft.com/products/novoalign/)
-* Picard (http://broadinstitute.github.io/picard/)
+* Novalign 3.09 (http://www.novocraft.com/products/novoalign/)
+* Picard 2.25.5 (http://broadinstitute.github.io/picard/)
 * R (https://www.r-project.org/about.html)
 * Java
 
