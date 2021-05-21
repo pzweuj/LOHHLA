@@ -90,16 +90,11 @@ Within R, the following packages are required:
 * plyr
 * data.table
 
-If not available locally, these packages will be attempted to be installed.
-
-LOHHLA also requires an HLA fasta file. This can be obtained from Polysolver 
-(http://archive.broadinstitute.org/cancer/cga/polysolver).
-
 ### How do I install LOHHLA? ###
 
 To install LOHHLA, simply clone the repository:
 
-git clone https://bitbucket.org/mcgranahanlab/lohhla.git
+git clone https://github.com/pzweuj/LOHHLA.git
 
 ### How do I run LOHHLA? ###
 
@@ -109,11 +104,11 @@ example below).
 
 USAGE: 
 
-    Rscript /location/of/LOHHLA/script  [OPTIONS]
+    Rscript LOHHLAscript.R  [OPTIONS]
 
 For a description of all the options, run: 
 
-    Rscript /location/of/LOHHLA/script --help
+    Rscript LOHHLAscript.R -h
 
 
 ### What is the output of LOHHLA? ###
