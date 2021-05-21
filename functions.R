@@ -235,7 +235,7 @@ identify_kmers <- function(workDir, kmerSize, HLAfastaLoc, jellyFish) {
 
 
 get.partially.matching.reads <- function(workDir, sample_dir, BAMDir, BAMfile,
-                                         kmerSize, gatkDir, samtools) {
+                                         kmerSize, picardDir, samtools) {
   kmerFile <- paste(workDir, '/', kmerSize, 'mer_uniq', sep = '')
 
   # add header
@@ -251,7 +251,7 @@ get.partially.matching.reads <- function(workDir, sample_dir, BAMDir, BAMfile,
   system(cmd)
 
   ## convert to fastq
-  cmd <- paste('java -jar ', gatkDir, '/SamToFastq.jar',
+  cmd <- paste('java -jar ', picardDir, '/picard.jar SamToFastq',
     ' I=', sample_dir, '/fished.sam',
     ' F=', sample_dir, '/fished.1.fastq',
     ' F2=', sample_dir, '/fished.2.fastq',
@@ -591,8 +591,8 @@ run_LOHHLA <- function(opt) {
   numMisMatch <- opt$numMisMatch %||% 1
   mappingStep <- opt$mappingStep %||% TRUE
   cleanUp <- opt$cleanUp %||% FALSE
-  gatkDir <- opt$gatkDir
-  stopifnot(dir.exists(gatkDir))
+  picardDir <- opt$picardDir
+  stopifnot(dir.exists(picardDir))
   kmerSize <- opt$kmerSize %||% 50
   fishingStep <- opt$fishingStep %||% TRUE
   coverageStep <- opt$coverageStep %||% TRUE
@@ -663,10 +663,10 @@ run_LOHHLA <- function(opt) {
   }
 
   params <- list(patientId, workDir, hlaPath, normalBAMfile, tumorBAMfile,
-                 BAMDir, HLAfastaLoc, CopyNumLoc, gatkDir, novoDir)
+                 BAMDir, HLAfastaLoc, CopyNumLoc, picardDir, novoDir)
   names(params) <- c('patientId', 'workDir', 'hlaPath', 'normalBAMfile',
                      'tumorBAMfile', 'BAMDir', 'HLAfastaLoc', 'CopyNumLoc', 
-                     'gatkDir', 'novoDir')
+                     'picardDir', 'novoDir')
   document_params(params, log_fn)
 
   BAMfiles <- c(basename(tumorBAMfile), basename(normalBAMfile))
@@ -902,12 +902,13 @@ run_LOHHLA <- function(opt) {
       length(readLines(sam_file))
       # length(readLines(chr6.f1))
       # length(readLines(chr6.f2))
-      file.remove(chr6.f2)
+      if(file.exists(chr6.f2))
+        file.remove(chr6.f2, showWarnings=FALSE)
       ## Turn into fastq -- this step has an error with unpaired mates, but
       ## seems to work ok just the same (VALIDATION_STRINGENCY = SILENT)
       logger('Turn (fished) reads into a fastq file')
       samToFastQ <- paste('java',
-        ' -jar ', gatkDir, '/SamToFastq.jar',
+        ' -jar ', picardDir, '/picard.jar SamToFastq',
         ' I=', sam_file,
         ' F=', chr6.f1,
         ' F2=', chr6.f2,
@@ -936,7 +937,7 @@ run_LOHHLA <- function(opt) {
         logger('Adding reads aligned to alternate loci')
         ## Generate fished.f1 & fished.f2 fastqs
         get.partially.matching.reads(workDir, sample_dir, BAMDir, BAMfile,
-                                     kmerSize, gatkDir, samtools)
+                                     kmerSize, picardDir, samtools)
         logger('Combine chr6 reads with fished reads from alternate loci')
         ## Overwrite chr6.f1 and chr6.2 to include fished reads
         combine.fastqs(chr6.f1, fished.f1)
@@ -1000,7 +1001,7 @@ run_LOHHLA <- function(opt) {
       # file.size(ref_sam)
       # file.size(ref_bam)
 
-      sortBAM <- paste('java -jar ', gatkDir, '/SortSam.jar',
+      sortBAM <- paste('java -jar ', picardDir, '/picard.jar SortSam',
         ' I=', sample_dir, '/', BAMid, '.chr6region.patient.reference.hlas.bam',
         ' O=', sample_dir, '/', BAMid,
         '.chr6region.patient.reference.hlas.csorted.bam',
@@ -1091,7 +1092,7 @@ run_LOHHLA <- function(opt) {
         } else {
           write_tsv(passed_reads, passed_reads_fn, col.names = F)
 
-          extractCMD <- paste0('java -jar ', gatkDir, '/FilterSamReads.jar',
+          extractCMD <- paste0('java -jar ', picardDir, '/picard.jar FilterSamReads',
             ' I=', BAM_fn,
             ' FILTER=includeReadList',
             ' READ_LIST_FILE=', passed_reads_fn,
@@ -1113,7 +1114,7 @@ run_LOHHLA <- function(opt) {
     for (sample in samples) {
       logger(sprintf('get coverage of HLA alleles for sample: %s', sample))
       sample_dir <- paste(workDir, '/', sample, sep = '')
-
+      # dir.create(sample_dir)
       filteredBAMfiles <- grep('filtered.bam$',
         grep('type', list.files(sample_dir, recursive = T), value = TRUE),
         value = TRUE)
